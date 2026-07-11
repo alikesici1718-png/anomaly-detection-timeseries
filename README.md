@@ -1,5 +1,9 @@
 ﻿# Time Series Anomaly Detection — Method Comparison
 
+![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 > **TL;DR:** Compared two anomaly detection methods (rolling z-score baseline vs. STL-decomposition residual) on NYC taxi demand data with 5 known anomaly windows (holidays, storms). Point-wise evaluation favors STL (F1=0.093 vs 0.040), but window-wise evaluation reverses the ranking entirely (Baseline F1=0.53 vs STL F1=0.23) — because point-wise metrics penalize slow-onset anomalies unfairly, while STL's higher false-positive rate is only correctly penalized under window-based scoring. The choice of evaluation methodology changes which method appears to "win."
 >
 > **Correction (independent verification):** An earlier version of this README reported Baseline F1=0.035 (point) and F1=0.508 (window). Those numbers were wrong: `pandas.rolling()` includes the current observation in the window, so the implementation was not truly past-only despite the code comment. A `shift(1)` fix was applied after independent verification caught the discrepancy. Corrected numbers are used throughout.
