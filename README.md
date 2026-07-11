@@ -1,6 +1,8 @@
 ﻿# Time Series Anomaly Detection — Method Comparison
 
-> **TL;DR:** Compared two anomaly detection methods (rolling z-score baseline vs. STL-decomposition residual) on NYC taxi demand data with 5 known anomaly windows (holidays, storms). Point-wise evaluation favors STL (F1=0.093 vs 0.035), but window-wise evaluation reverses the ranking entirely (Baseline F1=0.51 vs STL F1=0.23) — because point-wise metrics penalize slow-onset anomalies unfairly, while STL's higher false-positive rate is only correctly penalized under window-based scoring. The choice of evaluation methodology changes which method appears to "win."
+> **TL;DR:** Compared two anomaly detection methods (rolling z-score baseline vs. STL-decomposition residual) on NYC taxi demand data with 5 known anomaly windows (holidays, storms). Point-wise evaluation favors STL (F1=0.093 vs 0.040), but window-wise evaluation reverses the ranking entirely (Baseline F1=0.53 vs STL F1=0.23) — because point-wise metrics penalize slow-onset anomalies unfairly, while STL's higher false-positive rate is only correctly penalized under window-based scoring. The choice of evaluation methodology changes which method appears to "win."
+>
+> **Correction (independent verification):** An earlier version of this README reported Baseline F1=0.035 (point) and F1=0.508 (window). Those numbers were wrong: `pandas.rolling()` includes the current observation in the window, so the implementation was not truly past-only despite the code comment. A `shift(1)` fix was applied after independent verification caught the discrepancy. Corrected numbers are used throughout.
 
 ---
 
@@ -35,7 +37,7 @@
 
 Computes a rolling mean and standard deviation over a **14-day past-only window** (672 steps). A point is flagged anomalous if its z-score exceeds the threshold.
 
-- Window: 672 steps (14 days, past-only — centered window excluded because anomaly days would dilute their own mean)
+- Window: 672 steps (14 days, truly past-only via `shift(1)` — the current observation is excluded from its own window)
 - Threshold: |z| > 2.0
 
 ### Method 2 — STL Residual Z-Score
@@ -61,11 +63,11 @@ Decomposes the series into trend, seasonal, and residual components using **STL 
 
 | # | Window | Baseline | STL |
 |---|---|---|---|
-| 1 | 2014-10-30 → 11-03 | **YES** (3 hits) | **YES** (20 hits) |
-| 2 | 2014-11-25 → 11-29 | **NO** | **YES** (4 hits) |
-| 3 | 2014-12-23 → 12-27 | **YES** (2 hits) | **YES** (1 hit) |
-| 4 | 2014-12-29 → 01-03 | **YES** (6 hits) | **YES** (20 hits) |
-| 5 | 2015-01-24 → 01-29 | **YES** (8 hits) | **YES** (36 hits) |
+| 1 | 2014-10-30 → 11-03 | **YES** | **YES** |
+| 2 | 2014-11-25 → 11-29 | **NO** | **YES** |
+| 3 | 2014-12-23 → 12-27 | **YES** | **YES** |
+| 4 | 2014-12-29 → 01-03 | **YES** | **YES** |
+| 5 | 2015-01-24 → 01-29 | **YES** | **YES** |
 
 **Baseline: 4/5 windows detected — STL: 5/5 windows detected**
 
@@ -73,20 +75,20 @@ Decomposes the series into trend, seasonal, and residual components using **STL 
 
 | Metric | Baseline (point) | STL (point) | Baseline (window) | STL (window) |
 |---|---:|---:|---:|---:|
-| Precision | 0.3725 | 0.1238 | 0.3725 | 0.1302 |
-| Recall | 0.0184 | 0.0744 | 0.8000 | 1.0000 |
-| F1 | 0.0350 | 0.0929 | **0.5084** | 0.2304 |
-| TP | 19 pts | 77 pts | 4 / 5 wins | 5 / 5 wins |
-| FP | 32 pts | 545 pts | 32 pts | 541 pts |
-| FN | 1,016 pts | 958 pts | 1 / 5 wins | 0 / 5 wins |
+| Precision | 0.4000 | 0.1238 | 0.4000 | 0.1302 |
+| Recall | 0.0213 | 0.0744 | 0.8000 | 1.0000 |
+| F1 | 0.0404 | 0.0929 | **0.5333** | 0.2304 |
+| TP | 22 pts | 77 pts | 4 / 5 wins | 5 / 5 wins |
+| FP | 33 pts | 545 pts | 33 pts | 541 pts |
+| FN | 1,013 pts | 958 pts | 1 / 5 wins | 0 / 5 wins |
 
 | Parameter | Value |
 |---|---|
 | Threshold | \|z\| > 2.0 |
-| Baseline lookback | 672 steps (14 days, past-only) |
+| Baseline lookback | 672 steps (14 days, truly past-only via shift(1)) |
 | STL period | 48 (daily), seasonal window 337 (weekly) |
 | Window tolerance | 10% of each window length |
-| Total predicted anomalies — Baseline | 51 points |
+| Total predicted anomalies — Baseline | 55 points |
 | Total predicted anomalies — STL | 622 points |
 
 ---

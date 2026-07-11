@@ -26,8 +26,11 @@ for win in windows:
 LOOKBACK = 48 * 14
 THRESH   = 2.0
 
-roll_mean   = df["value"].rolling(LOOKBACK, min_periods=48).mean()
-roll_std    = df["value"].rolling(LOOKBACK, min_periods=48).std().fillna(1).replace(0, 1)
+# shift(1) makes the window truly past-only (current point excluded).
+# Bug fixed: original .rolling() without shift includes the current observation.
+shifted     = df["value"].shift(1)
+roll_mean   = shifted.rolling(LOOKBACK, min_periods=48).mean()
+roll_std    = shifted.rolling(LOOKBACK, min_periods=48).std().fillna(1).replace(0, 1)
 zscore      = (df["value"] - roll_mean) / roll_std
 pred_zscore = (np.abs(zscore) > THRESH).astype(int)
 

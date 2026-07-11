@@ -8,9 +8,15 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 
 
 def rolling_zscore(values: pd.Series, lookback: int, min_periods: int = 1) -> pd.Series:
-    """Past-only rolling z-score. Returns a Series of the same length."""
-    mean = values.rolling(lookback, min_periods=min_periods).mean()
-    std  = values.rolling(lookback, min_periods=min_periods).std().fillna(1).replace(0, 1)
+    """Truly past-only rolling z-score (shift(1) excludes the current point).
+
+    Bug fixed: the original implementation used pandas .rolling() directly,
+    which includes the current observation in the window despite the "past-only"
+    comment. shift(1) corrects this. Discovered during independent verification.
+    """
+    shifted = values.shift(1)
+    mean = shifted.rolling(lookback, min_periods=min_periods).mean()
+    std  = shifted.rolling(lookback, min_periods=min_periods).std().fillna(1).replace(0, 1)
     return (values - mean) / std
 
 
