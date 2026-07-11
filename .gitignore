@@ -1,51 +1,26 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
 *.pyo
+.env
+venv/
+.venv/
 *.egg-info/
 dist/
 build/
-.eggs/
-
-# Virtual environments
-.env
-.venv
-env/
-venv/
-
-# Large data files
-data/*.csv
-data/*.parquet
-data/*.json
-data/*.zip
-data/*.gz
-data/*.tar
-data/*.h5
-data/*.pkl
-data/*.pickle
-data/*.feather
-
-# Keep subdirs
-!data/.gitkeep
 
 # Jupyter
 .ipynb_checkpoints/
 
-# IDEs
-.vscode/
-.idea/
-*.swp
+# Data (large files)
+data/raw/*.csv
+data/raw/*.zip
+*.parquet
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Model artifacts
-*.joblib
-*.model
-*.pt
-*.pth
-
-# Logs
-*.log
-logs/
+# IDE
+.vscode/
+.idea/
