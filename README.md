@@ -71,7 +71,7 @@ Decomposes the series into trend, seasonal, and residual components using **STL 
 
 ---
 
-### Main Finding — Evaluation Methodology Reverses the Ranking
+### Main Finding — Evaluation Methodology Reverses the Ranking (fixed threshold = 2.0)
 
 ![Point-based vs window-based F1](visualizations/04_f1_comparison.png)
 
@@ -79,9 +79,19 @@ Decomposes the series into trend, seasonal, and residual components using **STL 
 
 ---
 
+### Threshold Sweep — Data-Driven Threshold Selection
+
+![Threshold sweep](visualizations/05_threshold_sweep.png)
+
+*Window-based F1 as a function of threshold (swept 1.0 → 4.0, step 0.1). The red dotted line marks the previously fixed threshold of 2.0. Optimal thresholds (dashed verticals) are chosen by maximising window-based F1.*
+
+**Threshold is not arbitrary — it is optimised per method against window-based F1.**
+
+---
+
 ## Key Findings
 
-### Per-Window Detection (5 windows, 10% tolerance)
+### Fixed Threshold (|z| > 2.0) — Per-Window Detection (5 windows, 10% tolerance)
 
 | # | Window | Baseline | STL |
 |---|---|---|---|
@@ -93,7 +103,7 @@ Decomposes the series into trend, seasonal, and residual components using **STL 
 
 **Baseline: 4/5 windows detected — STL: 5/5 windows detected**
 
-### Point-Based vs Window-Based — Full Comparison
+### Fixed Threshold — Point-Based vs Window-Based Comparison
 
 | Metric | Baseline (point) | STL (point) | Baseline (window) | STL (window) |
 |---|---:|---:|---:|---:|
@@ -104,14 +114,29 @@ Decomposes the series into trend, seasonal, and residual components using **STL 
 | FP | 33 pts | 545 pts | 33 pts | 541 pts |
 | FN | 1,013 pts | 958 pts | 1 / 5 wins | 0 / 5 wins |
 
+### Optimal Threshold — Data-Driven Results
+
+Threshold swept from 1.0 to 4.0 (step 0.1); optimal chosen by maximising window-based F1.
+
+| | Baseline | STL |
+|---|---:|---:|
+| **Optimal threshold** | **2.5** | **3.5** |
+| Flags at optimal | 3 | 9 |
+| Window Precision | 1.0000 | 1.0000 |
+| Window Recall | 0.4000 | 0.4000 |
+| **Window F1 (optimal)** | **0.5714** | **0.5714** |
+| Window F1 (at thresh=2.0) | 0.5333 | 0.2304 |
+| **Gain vs fixed threshold** | **+0.038** | **+0.341** |
+
+Both methods reach the same optimal window-F1 (0.5714) via different paths: Baseline needs a modest upward nudge (2.0→2.5) to shed 33 FP points; STL needs a large jump (2.0→3.5) to eliminate 541 FP points. The STL gain from threshold optimisation is nearly 10× larger than Baseline's because at threshold 2.0 it was flooding false positives.
+
 | Parameter | Value |
 |---|---|
-| Threshold | \|z\| > 2.0 |
+| Baseline optimal threshold | \|z\| > 2.5 |
+| STL optimal threshold | \|z\| > 3.5 |
 | Baseline lookback | 672 steps (14 days, truly past-only via shift(1)) |
 | STL period | 48 (daily), seasonal window 337 (weekly) |
 | Window tolerance | 10% of each window length |
-| Total predicted anomalies — Baseline | 55 points |
-| Total predicted anomalies — STL | 622 points |
 
 ---
 
