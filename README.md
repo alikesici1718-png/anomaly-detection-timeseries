@@ -61,6 +61,24 @@ Decomposes the series into trend, seasonal, and residual components using **STL 
 
 ---
 
+## Visualizations
+
+### NYC Taxi Demand — Full Series with Labeled Anomaly Windows
+
+![Time series overview](visualizations/01_timeseries_overview.png)
+
+*7 months of 30-minute taxi pickup counts. Red shading marks the 5 labeled anomaly windows (holidays and winter storm). Anomalies are sustained demand shifts lasting several days — not point spikes.*
+
+---
+
+### Main Finding — Evaluation Methodology Reverses the Ranking
+
+![Point-based vs window-based F1](visualizations/04_f1_comparison.png)
+
+*Left: point-based F1 — STL wins (0.093 vs 0.040). Right: window-based F1 — Baseline wins (0.533 vs 0.230). The same two methods, ranked in opposite order depending solely on the choice of evaluation metric.*
+
+---
+
 ## Key Findings
 
 ### Per-Window Detection (5 windows, 10% tolerance)
